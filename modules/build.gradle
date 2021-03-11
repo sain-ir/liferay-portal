@@ -21,6 +21,12 @@ buildscript {
 
 apply plugin: "com.liferay.yarn.defaults.plugin"
 
+allprojects {
+    plugins.withId("com.liferay.node") {
+        node.nodeVersion = '10.24.0'
+    }
+}
+
 ext {
 	projectTemplateTokens = [
 		"biz.aQute.bnd.version": "4.3.0",
