@@ -22,6 +22,8 @@ public class DDMFormFieldRendererRegistryUtil {
 	public static DDMFormFieldRenderer getDDMFormFieldRenderer(
 		String ddmFormFieldType) {
 
+		System.out.println("ddmFormFieldType = " + ddmFormFieldType);
+
 		return getDDMFormFieldRendererRegistry().getDDMFormFieldRenderer(
 			ddmFormFieldType);
 	}

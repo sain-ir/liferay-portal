@@ -23,6 +23,7 @@
 		<div class="input-group-item input-group-item-shrink input-localized-content <%= hideClass %>" role="menu" style="justify-content: flex-end;">
 
 			<%
+				System.out.println("html ... jsp");
 			String defaultLanguageId = null;
 
 			if (defaultEditLocale == null) {

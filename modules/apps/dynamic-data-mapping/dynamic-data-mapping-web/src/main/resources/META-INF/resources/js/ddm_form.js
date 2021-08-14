@@ -1575,6 +1575,8 @@ AUI.add(
 
 					var portletNamespace = instance.get('portletNamespace');
 
+					console.log('HERER _handleSelectButtonClick ');
+
 					Liferay.Util.openSelectionModal({
 						onSelect: (selectedItem) => {
 							if (selectedItem) {
@@ -1589,6 +1591,7 @@ AUI.add(
 								});
 							}
 						},
+						multiple: true,
 						selectEventName:
 							portletNamespace + 'selectDocumentLibrary',
 						title: Liferay.Language.get('select-file'),

@@ -167,6 +167,8 @@ public class DocumentLibraryDDMFormFieldTemplateContextContributor
 			value = "{}";
 		}
 
+		System.out.println("Here ....");
+
 		parameters.put("value", value);
 
 		return parameters;
@@ -174,6 +176,7 @@ public class DocumentLibraryDDMFormFieldTemplateContextContributor
 
 	protected FileEntry getFileEntry(JSONObject valueJSONObject) {
 		try {
+			System.out.println("HERE 2 ...");
 			return dlAppService.getFileEntryByUuidAndGroupId(
 				valueJSONObject.getString("uuid"),
 				valueJSONObject.getLong("groupId"));

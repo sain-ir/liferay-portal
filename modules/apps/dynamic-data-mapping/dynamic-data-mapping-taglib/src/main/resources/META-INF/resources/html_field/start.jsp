@@ -24,6 +24,9 @@
 
 		DDMFormField ddmFormField = ddmFormFieldsMap.get(field.getName());
 
+		System.out.println("field.getName() = " + field.getName());
+
+
 		DDMFormFieldRenderer ddmFormFieldRenderer = DDMFormFieldRendererRegistryUtil.getDDMFormFieldRenderer(ddmFormField.getType());
 
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext = new DDMFormFieldRenderingContext();

@@ -250,6 +250,8 @@ const Main = ({
 	const [valid, setValid] = useState(initialValid);
 	const [progress, setProgress] = useState(0);
 
+	console.log('Hi 2....');
+
 	const getErrorMessages = (errorMessage, isSignedIn) => {
 		const errorMessages = [errorMessage];
 
@@ -321,9 +323,10 @@ const Main = ({
 	};
 
 	const handleSelectButtonClicked = ({portletNamespace}) => {
+		console.log('Hi ....');
 		const itemSelectorDialog = new ItemSelectorDialog({
 			eventName: `${portletNamespace}selectDocumentLibrary`,
-			singleSelect: true,
+			singleSelect: false,
 			url: itemSelectorURL,
 		});
 

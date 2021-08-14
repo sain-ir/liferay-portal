@@ -45,6 +45,9 @@ public class DocumentLibraryDDMFormFieldValueRenderer
 				ddmFormFieldValue, locale);
 
 		String uuid = jsonObject.getString("uuid");
+
+		System.out.println("uuid = " + uuid);
+
 		long groupId = jsonObject.getLong("groupId");
 
 		if (Validator.isNull(uuid) || (groupId == 0)) {
