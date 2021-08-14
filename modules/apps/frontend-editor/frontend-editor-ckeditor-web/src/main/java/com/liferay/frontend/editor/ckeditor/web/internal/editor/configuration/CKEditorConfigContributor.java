@@ -202,9 +202,18 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		Map<String, Object> inputEditorTaglibAttributes) {
 
 		JSONArray jsonArray = JSONUtil.putAll(
-			toJSONArray("['Undo', 'Redo']"),
-			toJSONArray("['Styles', 'Bold', 'Italic', 'Underline']"),
+			toJSONArray("['Undo', 'Redo']"), toJSONArray("['Styles']"),
+			toJSONArray(
+				"['Cut', 'Copy', 'Paste', '-', 'PasteText', 'PasteFromWord'," +
+					"'CodeSnippet', '-', 'SelectAll']"),
+			toJSONArray("['TextColor', 'BGColor']"),
+			toJSONArray(
+				"['JustifyLeft', 'JustifyCenter', 'JustifyRight', " +
+					"'JustifyBlock']"),
+			toJSONArray("['Bold', 'Italic', 'Underline', 'Strikethrough']"),
+			toJSONArray("['RemoveFormat']"),
 			toJSONArray("['NumberedList', 'BulletedList']"),
+			toJSONArray("['Outdent', 'Indent']"),
 			toJSONArray("['Link', Unlink]"),
 			toJSONArray("['Table', 'ImageSelector', 'VideoEmbed']"));
 
