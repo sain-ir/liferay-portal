@@ -139,6 +139,7 @@
 						Array.prototype.forEach.call(assetEntryIds, function (
 							assetEntry
 						) {
+
 							var entityId = assetEntry.entityid;
 
 							if (searchContainerData.indexOf(entityId) == -1) {

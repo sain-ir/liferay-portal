@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -27,6 +28,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.portlet.PortletRequest;
 
 /**
  * @author Adolfo Pérez
@@ -37,6 +39,9 @@ public class RepositoryEntryBrowserDisplayContext {
 		HttpServletRequest httpServletRequest) {
 
 		_httpServletRequest = httpServletRequest;
+		_portletRequest = (PortletRequest)httpServletRequest.getAttribute(
+			JavaConstants.JAVAX_PORTLET_REQUEST);
+
 	}
 
 	public String getGroupCssIcon(long groupId) throws PortalException {
@@ -88,7 +93,19 @@ public class RepositoryEntryBrowserDisplayContext {
 		return group;
 	}
 
+	public long[] getCheckedFileEntryIds() {
+		return ParamUtil.getLongValues(_portletRequest, "checkedFileEntryIds");
+	}
+
+	public boolean isCheckedFileEntryIdsEnable() {
+		return ParamUtil.getBoolean(_portletRequest, "checkedFileEntryIdsEnabled");
+	}
+
+
+	private final PortletRequest _portletRequest;
+
 	private final HttpServletRequest _httpServletRequest;
+
 	private Boolean _searchEverywhere;
 
 }

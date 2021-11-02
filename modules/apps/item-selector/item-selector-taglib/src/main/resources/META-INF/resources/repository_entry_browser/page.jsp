@@ -1,4 +1,6 @@
-<%--
+<%@ page import="com.liferay.portal.kernel.dao.search.RowChecker" %>
+<%@ page
+	import="com.liferay.item.selector.taglib.internal.dao.search.RepositoryEntrySelectorChecker" %><%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -23,6 +25,10 @@ String displayStyle = GetterUtil.getString(request.getAttribute("liferay-item-se
 String emptyResultsMessage = GetterUtil.getString(request.getAttribute("liferay-item-selector:repository-entry-browser:emptyResultsMessage"));
 ItemSelectorReturnType existingFileEntryReturnType = (ItemSelectorReturnType)request.getAttribute("liferay-item-selector:repository-entry-browser:existingFileEntryReturnType");
 List<String> extensions = (List)request.getAttribute("liferay-item-selector:repository-entry-browser:extensions");
+	for (int i = 0; i < extensions.size(); i++) {
+		String s =  extensions.get(i);
+		System.out.println("s = " + s);
+	}
 String itemSelectedEventName = GetterUtil.getString(request.getAttribute("liferay-item-selector:repository-entry-browser:itemSelectedEventName"));
 ItemSelectorReturnTypeResolver<?, FileEntry> itemSelectorReturnTypeResolver = (ItemSelectorReturnTypeResolver<?, FileEntry>)request.getAttribute("liferay-item-selector:repository-entry-browser:itemSelectorReturnTypeResolver");
 long maxFileSize = GetterUtil.getLong(request.getAttribute("liferay-item-selector:repository-entry-browser:maxFileSize"));
@@ -49,11 +55,29 @@ if (Validator.isNotNull(keywords)) {
 </liferay-util:html-top>
 
 <%
+
+	System.out.println("displayStyle = " + displayStyle);
+	System.out.println("emptyResultsMessage = " + emptyResultsMessage);
 RepositoryEntryBrowserDisplayContext repositoryEntryBrowserDisplayContext = new RepositoryEntryBrowserDisplayContext(request);
 
 ItemSelectorRepositoryEntryManagementToolbarDisplayContext itemSelectorRepositoryEntryManagementToolbarDisplayContext = new ItemSelectorRepositoryEntryManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, repositoryEntryBrowserDisplayContext);
 
-SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSelectorRepositoryEntryManagementToolbarDisplayContext.getCurrentSortingURL(), null, emptyResultsMessage);
+SearchContainer<FileEntry> searchContainer = new SearchContainer(renderRequest, itemSelectorRepositoryEntryManagementToolbarDisplayContext.getCurrentSortingURL(), null, emptyResultsMessage);
+	RowChecker rowChecker = new RepositoryEntrySelectorChecker(
+		renderResponse, repositoryEntryBrowserDisplayContext.getCheckedFileEntryIds(),
+		true);
+
+	System.out.println("repositoryEntryBrow66666serDisplayContext = " +
+					   repositoryEntryBrowserDisplayContext.isCheckedFileEntryIdsEnable()
+	);
+	for (int i = 0; i < repositoryEntryBrowserDisplayContext.getCheckedFileEntryIds().length; i++) {
+		 long id = repositoryEntryBrowserDisplayContext.getCheckedFileEntryIds()[i];
+		System.out.println("id = " + id);
+	}
+	searchContainer.setRowChecker(rowChecker);
+
+	searchContainer.setResults(repositoryEntries);
+
 %>
 
 <clay:management-toolbar
@@ -65,12 +89,13 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 	searchActionURL="<%= String.valueOf(itemSelectorRepositoryEntryManagementToolbarDisplayContext.getSearchURL()) %>"
 	searchFormMethod="POST"
 	searchFormName="searchFm"
-	selectable="<%= false %>"
+	selectable="<%= true %>"
 	showInfoButton="<%= false %>"
 	showSearch="<%= showSearch %>"
 	sortingOrder="<%= itemSelectorRepositoryEntryManagementToolbarDisplayContext.getOrderByType() %>"
 	sortingURL="<%= String.valueOf(itemSelectorRepositoryEntryManagementToolbarDisplayContext.getSortingURL()) %>"
 	viewTypeItems="<%= itemSelectorRepositoryEntryManagementToolbarDisplayContext.getViewTypes() %>"
+	searchContainerId="ItemSelectorSearchContainer"
 />
 
 <clay:container-fluid
@@ -105,7 +130,7 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 		<liferay-util:buffer
 			var="selectFileHTML"
 		>
-			<input accept="<%= ListUtil.isEmpty(extensions) ? "*" : StringUtil.merge(extensions) %>" class="input-file" id="<%= randomNamespace %>InputFile" type="file" />
+			<input accept="<%= ListUtil.isEmpty(extensions) ? "*" : StringUtil.merge(extensions) %>" class="input-file" id="<%= randomNamespace %>InputFile" type="file"  multiple="multiple" />
 
 			<label class="btn btn-secondary" for="<%= randomNamespace %>InputFile"><liferay-ui:message key="select-file" /></label>
 		</liferay-util:buffer>
@@ -123,19 +148,23 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 	</c:if>
 
 	<c:if test="<%= (existingFileEntryReturnType != null) || (itemSelectorReturnTypeResolver != null) %>">
-		<liferay-ui:search-container
+		<aui:form cssClass="container-fluid-1280 portlet-site-memberships-select-users" name="fm">
+			<liferay-ui:search-container
 			cssClass='<%= displayStyle.equals("list") ? "main-content-body" : StringPool.BLANK %>'
 			searchContainer="<%= searchContainer %>"
 			total="<%= repositoryEntriesCount %>"
 			var="listSearchContainer"
+			id="ItemSelectorSearchContainer"
 		>
-			<liferay-ui:search-container-results
-				results="<%= repositoryEntries %>"
-			/>
+<%--			<liferay-ui:search-container-results--%>
+<%--				results="<%= repositoryEntries %>"--%>
+<%--			/>--%>
 
 			<liferay-ui:search-container-row
 				className="com.liferay.portal.kernel.repository.model.RepositoryEntry"
 				modelVar="repositoryEntry"
+				cssClass="repository-row"
+				keyProperty="fileEntryId"
 			>
 				<c:choose>
 					<c:when test='<%= displayStyle.equals("list") %>'>
@@ -168,12 +197,27 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 							JSONObject itemMedatadaJSONObject = ItemSelectorRepositoryEntryBrowserUtil.getItemMetadataJSONObject(fileEntry, locale);
 
 							String thumbnailSrc = DLURLHelperUtil.getThumbnailSrc(fileEntry, themeDisplay);
+
+							row.setData(
+								HashMapBuilder.<String, Object>put(
+									"classPK", fileEntry.getFileEntryId()
+								).put(
+									"groupId", fileEntry.getGroupId()
+								).put(
+									"title", fileEntry.getTitle()
+								).put(
+									"type", "document"
+								).put(
+									"uuid", fileEntry.getUuid()
+								).build());
+
 							%>
 
 							<liferay-ui:search-container-column-text
 								name="title"
 							>
-								<a class="item-preview" data-metadata="<%= HtmlUtil.escapeAttribute(itemMedatadaJSONObject.toString()) %>" data-returnType="<%= HtmlUtil.escapeAttribute(ItemSelectorRepositoryEntryBrowserUtil.getItemSelectorReturnTypeClassName(itemSelectorReturnTypeResolver, existingFileEntryReturnType)) %>" data-url="<%= HtmlUtil.escapeAttribute(DLURLHelperUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>" data-value="<%= HtmlUtil.escapeAttribute(ItemSelectorRepositoryEntryBrowserUtil.getValue(itemSelectorReturnTypeResolver, existingFileEntryReturnType, fileEntry, themeDisplay)) %>" href="<%= Validator.isNotNull(thumbnailSrc) ? HtmlUtil.escapeHREF(DLURLHelperUtil.getImagePreviewURL(fileEntry, themeDisplay)) : themeDisplay.getPathThemeImages() + "/file_system/large/default.png" %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
+								<a class="item-preview" data-metadata="<%= HtmlUtil.escapeAttribute(itemMedatadaJSONObject.toString()) %>" data-returnType="<%= HtmlUtil.escapeAttribute(ItemSelectorRepositoryEntryBrowserUtil.getItemSelectorReturnTypeClassName(itemSelectorReturnTypeResolver, existingFileEntryReturnType)) %>" data-url="<%= HtmlUtil.escapeAttribute(DLURLHelperUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>"
+								   data-value="<%= HtmlUtil.escapeAttribute(ItemSelectorRepositoryEntryBrowserUtil.getValue(itemSelectorReturnTypeResolver, existingFileEntryReturnType, fileEntry, themeDisplay)) %>" href="<%= Validator.isNotNull(thumbnailSrc) ? HtmlUtil.escapeHREF(DLURLHelperUtil.getImagePreviewURL(fileEntry, themeDisplay)) : themeDisplay.getPathThemeImages() + "/file_system/large/default.png" %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
 
 									<%
 									String iconCssClass = DLUtil.getFileIconCssClass(fileEntry.getExtension());
@@ -366,6 +410,19 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 
 									JSONObject itemMedatadaJSONObject = ItemSelectorRepositoryEntryBrowserUtil.getItemMetadataJSONObject(fileEntry, locale);
 
+									row.setData(
+										HashMapBuilder.<String, Object>put(
+											"classPK", fileEntry.getFileEntryId()
+										).put(
+											"groupId", fileEntry.getGroupId()
+										).put(
+											"title", fileEntry.getTitle()
+										).put(
+											"type", "document"
+										).put(
+											"uuid", fileEntry.getUuid()
+										).build());
+
 									Map<String, Object> data = HashMapBuilder.<String, Object>put(
 										"description", fileEntry.getDescription()
 									).put(
@@ -399,6 +456,8 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 													data="<%= data %>"
 													icon="documents-and-media"
 													title="<%= title %>"
+													resultRow="<%= row %>"
+													rowChecker="<%= rowChecker %>"
 												>
 													<c:if test="<%= repositoryEntryBrowserDisplayContext.isSearchEverywhere() %>">
 														<liferay-frontend:vertical-card-footer>
@@ -429,6 +488,8 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 													data="<%= data %>"
 													imageUrl="<%= thumbnailSrc %>"
 													title="<%= title %>"
+													rowChecker="<%= rowChecker %>"
+													resultRow="<%= row %>"
 												>
 													<c:if test="<%= repositoryEntryBrowserDisplayContext.isSearchEverywhere() %>">
 														<liferay-frontend:vertical-card-footer>
@@ -507,12 +568,26 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 									JSONObject itemMedatadaJSONObject = ItemSelectorRepositoryEntryBrowserUtil.getItemMetadataJSONObject(fileEntry, locale);
 
 									String thumbnailSrc = DLURLHelperUtil.getThumbnailSrc(fileEntry, themeDisplay);
+
+									row.setData(
+										HashMapBuilder.<String, Object>put(
+											"classPK", fileEntry.getFileEntryId()
+										).put(
+											"groupId", fileEntry.getGroupId()
+										).put(
+											"title", fileEntry.getTitle()
+										).put(
+											"type", "document"
+										).put(
+											"uuid", fileEntry.getUuid()
+										).build());
 									%>
 
 									<c:choose>
 										<c:when test="<%= Validator.isNotNull(thumbnailSrc) %>">
 											<liferay-ui:search-container-column-image
 												src="<%= DLURLHelperUtil.getThumbnailSrc(fileEntry, themeDisplay) %>"
+												toggleRowChecker="<%= true %>"
 											/>
 										</c:when>
 										<c:otherwise>
@@ -580,13 +655,14 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 				searchContainer="<%= searchContainer %>"
 			/>
 		</liferay-ui:search-container>
-
+		</aui:form>
 		<c:if test="<%= !showSearchInfo && (uploadURL != null) %>">
 			<liferay-ui:drop-here-info
 				message="drop-files-here"
 			/>
 		</c:if>
 	</c:if>
+
 
 	<div class="item-selector-preview-container"></div>
 </clay:container-fluid>
@@ -622,6 +698,8 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 			<%
 			String returnType = ItemSelectorRepositoryEntryBrowserUtil.getItemSelectorReturnTypeClassName(itemSelectorReturnTypeResolver, existingFileEntryReturnType);
 
+			System.out.println("returnType = " + returnType);
+
 			uploadURL.setParameter("returnType", returnType);
 			%>
 
@@ -630,10 +708,76 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 		</c:if>
 	});
 
+	let selectedData;
+
 	itemSelector.on('selectedItem', function (event) {
+
+		// itemSelector.uploadedItems.push(event);
+		console.log('itemSelector.on(selectedItem)');
 		Liferay.Util.getOpener().Liferay.fire(
 			'<%= itemSelectedEventName %>',
 			event
 		);
+
+
+
+	});
+
+	// Liferay.Util.getOpener().Liferay.on('closeModal', () => {
+	// 	alert('OK Close ... ');
+	// 	console.log(itemSelector.uploadedItems);
+	// });
+
+</aui:script>
+
+<aui:script use="liferay-search-container">
+
+
+
+	var searchContainer = Liferay.SearchContainer.get(
+		'<portlet:namespace />ItemSelectorSearchContainer'
+	);
+
+	console.log(searchContainer);
+
+	searchContainer.on('rowToggled', function (event) {
+
+
+		var allSelectedElements = event.elements.allSelectedElements;
+		var selectedData = [];
+
+		console.log('Selected ');
+		console.log(event);
+		console.log(event.elements.allSelectedElements);
+
+		allSelectedElements.each(function () {
+			<c:choose>
+				<c:when test='<%= displayStyle.equals("list") %>'>
+					var row = this.ancestor('tr');
+				</c:when>
+				<c:otherwise>
+					var row = this.ancestor('li');
+				</c:otherwise>
+			</c:choose>
+
+			var data = row.getDOM().dataset;
+
+			console.log(data);
+
+			selectedData.push({
+				classPK: data.classpk,
+				groupId: data.groupid,
+				title: data.title,
+				uuid: data.uuid,
+				type: data.type
+			});
+		});
+
+<%--		Liferay.Util.getOpener().Liferay.fire(--%>
+<%--			'<%= itemSelectedEventName %>',--%>
+<%--			{--%>
+<%--				data: selectedData--%>
+<%--			}--%>
+<%--		);--%>
 	});
 </aui:script>

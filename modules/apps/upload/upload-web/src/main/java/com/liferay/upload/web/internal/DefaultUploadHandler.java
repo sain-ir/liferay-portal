@@ -72,6 +72,8 @@ public class DefaultUploadHandler implements UploadHandler {
 			PortletRequest portletRequest)
 		throws IOException, PortalException {
 
+		System.out.println("DefaultUploadHandler._getResponseJSONObject");
+
 		try {
 			UploadPortletRequest uploadPortletRequest =
 				_getUploadPortletRequest(portletRequest);
@@ -83,6 +85,7 @@ public class DefaultUploadHandler implements UploadHandler {
 				uploadPortletRequest, fileEntry);
 		}
 		catch (PortalException portalException) {
+			portalException.printStackTrace();
 			return uploadResponseHandler.onFailure(
 				portletRequest, portalException);
 		}

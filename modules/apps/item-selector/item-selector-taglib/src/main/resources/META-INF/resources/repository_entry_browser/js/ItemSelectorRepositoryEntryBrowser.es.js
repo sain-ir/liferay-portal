@@ -27,6 +27,8 @@ const STR_DRAG_OVER = 'dragover';
 const STR_DROP = 'drop';
 const statusCode = Liferay.STATUS_CODE;
 
+const uploadedItems = [];
+
 /**
  * Handles the events in the Repository Entry Browser taglib.
  *
@@ -88,7 +90,7 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 			currentIndex: index,
 			editItemURL: this.editItemURL,
 			handleSelectedItem: this._onItemSelected.bind(this),
-			headerTitle: this.closeCaption,
+			headerTitle: this.uploade,
 			items,
 			uploadItemReturnType: this.uploadItemReturnType,
 			uploadItemURL: this.uploadItemURL,
@@ -118,6 +120,9 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 	 * @private
 	 */
 	_bindEvents() {
+
+		var instance = this;
+
 		this._eventHandler.add(
 			dom.delegate(this.rootNode, 'click', '.item-preview', (event) =>
 				this._onItemSelected(event.delegateTarget.dataset)
@@ -129,7 +134,16 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 		if (inputFileNode) {
 			this._eventHandler.add(
 				inputFileNode.addEventListener('change', (event) => {
-					this._validateFile(event.target.files[0]);
+					console.log(event.target.files.length);
+					Array.from(event.target.files).forEach(file => {
+						this._validateFile(file);
+					 });
+
+					// event.target.files.forEach((file) => {
+					// 	console.log(file);
+					// 	instance._validateFile(file);
+					// });
+					// this._validateFile(event.target.files[0]);
 				})
 			);
 		}
@@ -142,30 +156,64 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 				itemSelectorUploader.after('itemUploadCancel', () => {
 					this.closeItemSelectorPreview();
 				}),
+				// itemSelectorUploader.after('itemUploadComplete', (itemsData) => {
 				itemSelectorUploader.after('itemUploadComplete', (itemData) => {
-					const itemFile = itemData.file;
-					const itemFileUrl = itemFile.url;
-					let itemFileValue = itemFile.resolvedValue;
 
-					if (!itemFileValue) {
-						const imageValue = {
-							fileEntryId: itemFile.fileEntryId,
-							groupId: itemFile.groupId,
-							title: itemFile.title,
-							type: itemFile.type,
-							url: itemFileUrl,
-							uuid: itemFile.uuid,
-						};
 
-						itemFileValue = JSON.stringify(imageValue);
-					}
+					console.log('itemUploadComplete');
+					// console.log(itemsData);
+					console.log(itemData);
 
-					Liferay.componentReady('ItemSelectorPreview').then(() => {
-						Liferay.fire('updateCurrentItem', {
-							url: itemFileUrl,
-							value: itemFileValue,
+					// Liferay.Util.getOpener().Liferay.fire(
+					// );
+
+					// Array.from(itemsData).forEach(itemData => {
+						const itemFile = itemData.file;
+						const itemFileUrl = itemFile.url;
+						let itemFileValue = itemFile.resolvedValue;
+
+						console.log('in for each ... ');
+						console.log(itemFileValue);
+
+						if (!itemFileValue) {
+							const imageValue = {
+								fileEntryId: itemFile.fileEntryId,
+								groupId: itemFile.groupId,
+								title: itemFile.title,
+								type: itemFile.type,
+								url: itemFileUrl,
+								uuid: itemFile.uuid,
+							};
+
+							itemFileValue = JSON.stringify(imageValue);
+						}
+
+						// instance._pushSelectedItems({
+						// 	value: itemFile
+						// });
+
+						this._showTempFile(itemFile.title,itemFileUrl)
+
+						uploadedItems.push(
+							 {
+							value: itemFile
 						});
-					});
+
+						this._onItemSelected(uploadedItems);
+
+						// Liferay.Util.getOpener().Liferay.fire('closeModal');
+
+						// Liferay.componentReady('ItemSelectorPreview').then(() => {
+						// 	Liferay.fire('updateCurrentItem', {
+						// 		url: itemFileUrl,
+						// 		value: itemFileValue,
+						// 	});
+						// });
+					// });
+
+					// Liferay.Util.getOpener().Liferay.fire('closeModal');
+
+					// window.location.reload();
 				}),
 				itemSelectorUploader.after('itemUploadError', (event) => {
 					this._onItemUploadError(event);
@@ -237,7 +285,10 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 					rootNode.classList.remove('drop-active');
 
 					if (eventDrop) {
-						this._validateFile(dataTransfer.files[0]);
+						Array.from(dataTransfer.files).forEach(file => {
+							this._validateFile(file);
+						});
+						// this._validateFile(dataTransfer.files[0]);
 					}
 				}
 			}
@@ -360,12 +411,11 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 	 * @param {Object} item
 	 * @private
 	 */
-	_onItemSelected(item) {
+	_onItemSelected(items) {
+		console.log('_onItemSelected');
+		console.log(items);
 		this.emit('selectedItem', {
-			data: {
-				returnType: item.returntype,
-				value: item.value,
-			},
+			items
 		});
 	}
 
@@ -428,6 +478,24 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 		);
 	}
 
+	_showTempFile(fileName, fileURL) {
+		new ClayAlert(
+			{
+				closeable: true,
+				destroyOnHide: true,
+				fileURL,
+				spritemap:
+					Liferay.ThemeDisplay.getPathThemeImages() +
+					'/clay/icons.svg',
+				style: 'danger',
+				title: fileName,
+				visible: true,
+			},
+			this.one('.message-container')
+		);
+
+	}
+
 	/**
 	 * Shows the selected item in the Item Viewer and
 	 * uploads to the server.
@@ -450,7 +518,11 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 			value: preview,
 		};
 
-		this.openItemSelectorPreview([item], 0);
+		// this.openItemSelectorPreview([item], 0);
+
+		// console.log(item);
+
+		console.log('Show file ....');
 
 		this._itemSelectorUploader.startUpload(file, this.uploadItemURL);
 	}
@@ -473,6 +545,7 @@ class ItemSelectorRepositoryEntryBrowser extends PortletBase {
 			validExtensions.indexOf(fileExtension) != -1
 		) {
 			const maxFileSize = this.maxFileSize;
+			console.log(maxFileSize);
 
 			if (file.size <= maxFileSize) {
 				this._previewFile(file);

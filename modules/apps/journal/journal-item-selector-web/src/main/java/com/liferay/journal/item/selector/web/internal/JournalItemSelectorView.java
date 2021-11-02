@@ -20,10 +20,12 @@ import com.liferay.item.selector.ItemSelectorView;
 import com.liferay.item.selector.PortletItemSelectorView;
 import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
+import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.item.selector.criterion.JournalItemSelectorCriterion;
 import com.liferay.journal.item.selector.web.internal.constants.JournalItemSelectorWebKeys;
 import com.liferay.journal.item.selector.web.internal.display.context.JournalItemSelectorViewDisplayContext;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.util.ListUtil;
 
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.portlet.PortletURL;
 
@@ -44,11 +47,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Modified;
+
 
 /**
  * @author Eduardo García
  */
 @Component(
+	configurationPid = "com.liferay.journal.configuration.JournalFileUploadsConfiguration",
 	property = "item.selector.view.order:Integer=100",
 	service = ItemSelectorView.class
 )
@@ -91,7 +98,8 @@ public class JournalItemSelectorView
 				new JournalItemSelectorViewDisplayContext(
 					(HttpServletRequest)servletRequest, itemSelectedEventName,
 					_itemSelectorReturnTypeResolverHandler,
-					journalItemSelectorCriterion, this, portletURL, search);
+					journalItemSelectorCriterion,_journalFileUploadsConfiguration,
+					this, portletURL, search);
 
 		servletRequest.setAttribute(
 			JournalItemSelectorWebKeys.
@@ -104,6 +112,13 @@ public class JournalItemSelectorView
 			servletContext.getRequestDispatcher("/journal_images.jsp");
 
 		requestDispatcher.include(servletRequest, servletResponse);
+	}
+
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_journalFileUploadsConfiguration =  ConfigurableUtil.createConfigurable(
+			JournalFileUploadsConfiguration.class, properties);
 	}
 
 	@Reference(unbind = "-")
@@ -138,5 +153,7 @@ public class JournalItemSelectorView
 	private Language _language;
 
 	private ServletContext _servletContext;
+	private volatile JournalFileUploadsConfiguration
+		_journalFileUploadsConfiguration;
 
 }

@@ -324,9 +324,15 @@ AUI.add(
 				_onInputFileChanged(event) {
 					var instance = this;
 
-					var file = event.currentTarget.getDOMNode().files[0];
+					// var file = event.currentTarget.getDOMNode().files[0];
+					console.log('testttttttttttttt');
 
-					instance._validateFile(file);
+					event.currentTarget.getDOMNode().files.forEach((file) => {
+						console.log(file);
+						instance._validateFile(file);
+					});
+
+
 				},
 
 				_onItemSelected(itemViewer) {
@@ -407,6 +413,8 @@ AUI.add(
 
 				_showFile(file, preview) {
 					var instance = this;
+
+					console.log('SHOWWWWWWWWWWWWWWWWWWWWWWWWW ');
 
 					var returnType = instance.get('uploadItemReturnType');
 

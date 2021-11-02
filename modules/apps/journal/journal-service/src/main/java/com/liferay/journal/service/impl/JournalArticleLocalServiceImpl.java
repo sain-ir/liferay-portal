@@ -6891,6 +6891,8 @@ public class JournalArticleLocalServiceImpl
 							folder.getGroupId(), folder.getFolderId(),
 							tempFileEntry.getFileName());
 
+						System.out.println("fileEntryName = " + fileEntryName);
+
 						fileEntry = _portletFileRepository.addPortletFileEntry(
 							folder.getGroupId(), tempFileEntry.getUserId(),
 							JournalArticle.class.getName(),

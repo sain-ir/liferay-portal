@@ -948,6 +948,8 @@ AUI.add(
 				getSiblings() {
 					var instance = this;
 
+					console.log('Here get sibilings ...');
+					console.log(instance.get('parent'));
 					return instance.get('parent').get('fields');
 				},
 
@@ -1056,9 +1058,11 @@ AUI.add(
 					instance.fire('liferay-ddm-field:render', {
 						field: instance,
 					});
+
+					return instance;
 				},
 
-				repeat() {
+				repeat(value = '') {
 					var instance = this;
 
 					instance._getTemplate((fieldTemplate) => {
@@ -1079,7 +1083,7 @@ AUI.add(
 
 						form.newRepeatableInstances.push(field);
 
-						field.renderUI();
+						field.renderUI().setValue(value);
 
 						instance._addFieldValidation(field, instance);
 					});
@@ -1580,15 +1584,89 @@ AUI.add(
 					Liferay.Util.openSelectionModal({
 						onSelect: (selectedItem) => {
 							if (selectedItem) {
-								var itemValue = JSON.parse(selectedItem.value);
+								console.log(selectedItem);
 
-								instance.setValue({
-									classPK: itemValue.fileEntryId,
-									groupId: itemValue.groupId,
-									title: itemValue.title,
-									type: itemValue.type,
-									uuid: itemValue.uuid,
-								});
+								var selectedItems = [];
+
+								if(selectedItem.items){
+									selectedItems = selectedItem.items;
+								}
+
+
+								for (var i = 0; i < selectedItems.length; i++) {
+
+									var itemValue = selectedItems[i];
+									var item;
+
+									console.log(itemValue);
+									console.log(itemValue.value.resolvedValue);
+
+									if(itemValue.value.resolvedValue){
+										item = JSON.parse(itemValue.value.resolvedValue);
+									}
+
+									var data = {
+										classPK: item.fileEntryId,
+										groupId: item.groupId,
+										title: item.title,
+										type: item.type,
+										uuid: item.uuid
+									};
+
+									console.log(data);
+
+									if(i == 0){
+										instance.setValue(data);
+									}else{
+										instance.repeat(data);
+									}
+								}
+
+								// selectedItem.forEach((itemValue) => {
+								// 	instance.repeat({
+								// 		classPK: itemValue.classPK,
+								// 		groupId: itemValue.groupId,
+								// 		title: itemValue.title,
+								// 		type: itemValue.type,
+								// 		uuid: itemValue.uuid
+								// 	});
+								//
+								// 	// instance.setValue()
+								// });
+
+								// var sibilings = instance.getRepeatedSiblings();
+								//
+								// for (var i = 0; i < sibilings.length; i++) {
+								// 	var instance1 = sibilings[i];
+								// 	console.log(i);
+								// 	console.log(instance1);
+								//
+								// 	var itemValue = selectedItem[i];
+								// 	instance1.setValue({
+								// 		classPK: itemValue.fileEntryId,
+								// 		groupId: itemValue.groupId,
+								// 		title: itemValue.title,
+								// 		type: itemValue.type,
+								// 		uuid: itemValue.uuid
+								// 	});
+								// }
+
+								// selectedItem.forEach((sibilings) => {
+								// 	var instance = this;
+								//
+								// 	console.log(instance);
+								//
+								// 	// instance.setValue()
+								// });
+								// var itemValue = JSON.parse(selectedItem.value);
+
+								// instance.setValue({
+								// 	classPK: itemValue.fileEntryId,
+								// 	groupId: itemValue.groupId,
+								// 	title: itemValue.title,
+								// 	type: itemValue.type,
+								// 	uuid: itemValue.uuid
+								// });
 							}
 						},
 						multiple: true,

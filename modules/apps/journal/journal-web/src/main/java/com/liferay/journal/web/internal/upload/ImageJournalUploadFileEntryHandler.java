@@ -25,12 +25,14 @@ import com.liferay.portal.kernel.exception.ImageTypeException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
+import com.liferay.portal.kernel.util.File;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
@@ -71,6 +73,9 @@ public class ImageJournalUploadFileEntryHandler
 		long resourcePrimKey = ParamUtil.getLong(
 			uploadPortletRequest, "resourcePrimKey");
 
+		System.out.println("ImageJournalUploadFileEntryHandler.upload");
+		System.out.println("resourcePrimKey **** = " + resourcePrimKey);
+
 		long folderId = ParamUtil.getLong(uploadPortletRequest, "folderId");
 
 		if (resourcePrimKey != 0) {
@@ -101,6 +106,8 @@ public class ImageJournalUploadFileEntryHandler
 
 			String uniqueFileName = _uniqueFileNameProvider.provide(
 				fileName, curFileName -> _exists(themeDisplay, curFileName));
+
+			System.out.println("uniqueFileName = " + uniqueFileName);
 
 			return TempFileEntryUtil.addTempFileEntry(
 				themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
@@ -201,5 +208,8 @@ public class ImageJournalUploadFileEntryHandler
 
 	@Reference
 	private UniqueFileNameProvider _uniqueFileNameProvider;
+
+	@Reference
+	private PortletFileRepository _portletFileRepository;
 
 }

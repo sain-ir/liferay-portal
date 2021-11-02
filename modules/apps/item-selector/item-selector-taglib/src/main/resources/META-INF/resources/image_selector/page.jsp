@@ -28,6 +28,8 @@ String paramName = GetterUtil.getString((String)request.getAttribute("liferay-ui
 String uploadURL = GetterUtil.getString((String)request.getAttribute("liferay-ui:image-selector:uploadURL"));
 String validExtensions = GetterUtil.getString((String)request.getAttribute("liferay-ui:image-selector:validExtensions"));
 
+	System.out.println("maxFileSize = " + maxFileSize);
+
 String cropRegion = ParamUtil.getString(request, paramName + "CropRegion");
 
 String imageURL = null;

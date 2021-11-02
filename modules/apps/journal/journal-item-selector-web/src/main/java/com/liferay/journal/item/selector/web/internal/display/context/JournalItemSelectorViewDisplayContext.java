@@ -18,6 +18,7 @@ import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.item.selector.ItemSelectorReturnTypeResolver;
 import com.liferay.item.selector.ItemSelectorReturnTypeResolverHandler;
 import com.liferay.item.selector.taglib.servlet.taglib.util.RepositoryEntryBrowserTagUtil;
+import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.item.selector.criterion.JournalItemSelectorCriterion;
 import com.liferay.journal.item.selector.web.internal.JournalItemSelectorView;
@@ -49,6 +50,8 @@ public class JournalItemSelectorViewDisplayContext {
 		ItemSelectorReturnTypeResolverHandler
 			itemSelectorReturnTypeResolverHandler,
 		JournalItemSelectorCriterion journalItemSelectorCriterion,
+		JournalFileUploadsConfiguration
+			journalFileUploadsConfiguration,
 		JournalItemSelectorView journalItemSelectorView, PortletURL portletURL,
 		boolean search) {
 
@@ -58,6 +61,7 @@ public class JournalItemSelectorViewDisplayContext {
 			itemSelectorReturnTypeResolverHandler;
 		_journalItemSelectorCriterion = journalItemSelectorCriterion;
 		_journalItemSelectorView = journalItemSelectorView;
+		_journalFileUploadsConfiguration = journalFileUploadsConfiguration;
 		_portletURL = portletURL;
 		_search = search;
 
@@ -67,6 +71,10 @@ public class JournalItemSelectorViewDisplayContext {
 
 	public Folder fetchAttachmentsFolder(long userId, long groupId) {
 		return null;
+	}
+
+	public String[] getExtensions() {
+		return _journalFileUploadsConfiguration.imageExtensions();
 	}
 
 	public String getItemSelectedEventName() {
@@ -149,6 +157,8 @@ public class JournalItemSelectorViewDisplayContext {
 		_itemSelectorReturnTypeResolverHandler;
 	private final JournalItemSelectorCriterion _journalItemSelectorCriterion;
 	private final JournalItemSelectorView _journalItemSelectorView;
+	private final JournalFileUploadsConfiguration
+	_journalFileUploadsConfiguration;
 	private final PortalPreferences _portalPreferences;
 	private final PortletURL _portletURL;
 	private final boolean _search;
